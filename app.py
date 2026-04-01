@@ -9,100 +9,104 @@ import random
 st.set_page_config(page_title="CB Financeiro | HermeX", layout="wide")
 
 # ================== SUPABASE ==================
-SUPABASE_URL = "https://dqckorlftspzadevawge.supabase.co"
-SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRxY2tvcmxmdHNwemFkZXZhd2dlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwNzMwNTksImV4cCI6MjA5MDY0OTA1OX0.OZz8Mt_oS4t57FxVmWsXsdhSg59Sb57B0V9BofQIrkQ"
+SUPABASE_URL = "COLE_SUA_URL_AQUI"
+SUPABASE_KEY = "COLE_SUA_KEY_AQUI"
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # ================== ANIMAÇÕES ==================
 st.markdown("""
 <style>
+
+/* Fundo gradient */
 .stApp {
-    background: radial-gradient(circle at top, #0a0014, #000);
+    background: linear-gradient(180deg, #000000, #0d001a);
     color: white;
 }
 
-/* partículas */
-.particle {
-    position: fixed;
-    width: 4px;
-    height: 4px;
-    background: #ff69b4;
-    border-radius: 50%;
-    animation: float 10s linear infinite;
-}
-@keyframes float {
-    to { transform: translateY(-120vh); }
-}
-
-/* corações */
+/* Corações */
 .heart {
     position: fixed;
     top: -10px;
-    font-size: 16px;
     color: #ff1493;
+    font-size: 16px;
     animation: fall linear infinite;
 }
 @keyframes fall {
     to { transform: translateY(110vh); }
 }
 
-/* dinheiro subindo */
-.money {
-    position: fixed;
-    bottom: 0;
-    color: #00ff88;
-    font-size: 20px;
-    animation: rise 2s ease-out;
-}
-@keyframes rise {
-    to { transform: translateY(-200px); opacity:0; }
-}
-
-/* logo glow */
+/* Logo com glow */
 .logo {
     font-size: 80px;
     background: linear-gradient(#ff1493,#ff69b4);
     -webkit-background-clip:text;
     -webkit-text-fill-color:transparent;
-    animation: glow 2s infinite alternate;
+    animation: glow 2s ease-in-out infinite alternate;
 }
 @keyframes glow {
-    from { text-shadow:0 0 10px #ff1493; }
-    to { text-shadow:0 0 30px #ff69b4; }
+    from { text-shadow: 0 0 10px #ff1493; }
+    to { text-shadow: 0 0 25px #ff69b4; }
 }
 
-/* cards */
+/* Cards */
 .card {
     background:#0a0a0a;
     padding:25px;
     border-radius:20px;
+    margin-bottom:20px;
     transition:0.3s;
+    border:1px solid #1a1a1a;
 }
 .card:hover {
-    transform:scale(1.04);
-    box-shadow:0 0 25px #ff1493;
+    transform: scale(1.03);
+    box-shadow: 0 0 20px #ff1493;
 }
 
+/* Valores */
 .value {
     font-size:30px;
     color:#ff1493;
     font-weight:bold;
+    animation: pulse 2s infinite;
+}
+@keyframes pulse {
+    0% {opacity:0.8;}
+    50% {opacity:1;}
+    100% {opacity:0.8;}
 }
 
-button {
-    background:#ff1493 !important;
+/* Botões */
+.stButton>button {
+    background:#ff1493;
+    color:white;
+    border-radius:10px;
+    transition:0.3s;
+}
+.stButton>button:hover {
+    transform:scale(1.05);
+}
+
+/* Inputs */
+input, select {
+    background:#111 !important;
     color:white !important;
 }
+
+/* Remove rodapé padrão */
+footer {visibility:hidden;}
+
 </style>
 """, unsafe_allow_html=True)
 
-# partículas
-for _ in range(25):
-    st.markdown(f"<div class='particle' style='left:{random.randint(0,100)}%; animation-duration:{random.randint(5,15)}s'></div>", unsafe_allow_html=True)
-
-# corações
-for _ in range(10):
-    st.markdown(f"<div class='heart' style='left:{random.randint(0,100)}%; animation-duration:{random.randint(5,12)}s'>❤️</div>", unsafe_allow_html=True)
+# gerar corações
+for i in range(20):
+    st.markdown(f"""
+    <div class="heart" style="
+        left:{random.randint(0,100)}%;
+        animation-duration:{random.randint(5,12)}s;
+        opacity:{random.random()};
+    ">❤️</div>
+    """, unsafe_allow_html=True)
 
 # ================== DATA ==================
 hoje = datetime.now()
@@ -115,14 +119,19 @@ response = supabase.table("transacoes").select("*").execute()
 df = pd.DataFrame(response.data) if response.data else pd.DataFrame()
 
 # ================== HEADER ==================
-c1,c2 = st.columns(2)
+col1,col2 = st.columns(2)
 
-with c1:
+with col1:
     st.markdown('<div class="logo">CB</div>', unsafe_allow_html=True)
-    st.write(f"📅 {hoje.strftime('%d/%m/%Y')}")
+    st.write(f"📅 Hoje: {hoje.strftime('%d/%m/%Y')}")
 
-with c2:
-    st.markdown(f"<h2 style='text-align:right'>{dias_restantes} dias 💕</h2>", unsafe_allow_html=True)
+with col2:
+    st.markdown(f"""
+    <div style='text-align:right'>
+        <div style='font-size:38px;font-weight:800;'>{dias_restantes} dias</div>
+        <div style='color:#ff69b4;'>para o nosso apê 🏠💖</div>
+    </div>
+    """, unsafe_allow_html=True)
 
 # ================== MOTOR ==================
 entrada = 0
@@ -132,24 +141,26 @@ for _, row in df.iterrows():
     inicio = pd.to_datetime(row['inicio']).date()
     fim = pd.to_datetime(row['fim']).date()
 
-    if inicio <= hoje.date() <= fim:
-        if row['tipo'] == 'Entrada':
+    ativo = inicio <= hoje.date() <= fim
+
+    if row['tipo'] == 'Entrada':
+        if ativo:
             entrada += float(row['valor'])
-        else:
-            if int(row['vencimento']) <= dia_atual:
-                saida += float(row['valor'])
+    else:
+        if ativo and int(row['vencimento']) <= dia_atual:
+            saida += float(row['valor'])
 
 saldo = entrada - saida
 
 # ================== DASH ==================
 c1,c2,c3 = st.columns(3)
 
-c1.markdown(f"<div class='card'>Entradas<br><span class='value'>R$ {entrada:.2f}</span></div>", unsafe_allow_html=True)
-c2.markdown(f"<div class='card'>Saídas<br><span class='value'>R$ {saida:.2f}</span></div>", unsafe_allow_html=True)
-c3.markdown(f"<div class='card'>Saldo<br><span class='value'>R$ {saldo:.2f}</span></div>", unsafe_allow_html=True)
+c1.markdown(f'<div class="card">Entradas<br><span class="value">R$ {entrada:.2f}</span></div>', unsafe_allow_html=True)
+c2.markdown(f'<div class="card">Saídas<br><span class="value">R$ {saida:.2f}</span></div>', unsafe_allow_html=True)
+c3.markdown(f'<div class="card">Saldo<br><span class="value">R$ {saldo:.2f}</span></div>', unsafe_allow_html=True)
 
 # ================== FORM ==================
-st.subheader("💖 Registrar")
+st.subheader("💖 Registrar momento financeiro")
 
 c1,c2,c3,c4 = st.columns([1,2,1,1])
 
@@ -169,7 +180,7 @@ else:
     inicio = hoje
     fim = hoje
 
-if st.button("Salvar 💸"):
+if st.button("Salvar 💕"):
     supabase.table("transacoes").insert({
         "data": hoje.strftime("%Y-%m-%d"),
         "tipo": tipo,
@@ -182,43 +193,35 @@ if st.button("Salvar 💸"):
         "quem": quem
     }).execute()
 
-    # animação dinheiro
-    for _ in range(5):
-        st.markdown(f"<div class='money' style='left:{random.randint(10,90)}%'>💸</div>", unsafe_allow_html=True)
-
-    st.success("Salvo com sucesso 💕")
     st.rerun()
-
-# ================== PREVISÃO ==================
-st.subheader("📊 Previsão Inteligente")
-
-saldo_temp = saldo
-dia_negativo = None
-
-for d in range(dia_atual, 32):
-    for _, row in df.iterrows():
-        if row['tipo']=="Saída" and int(row['vencimento']) == d:
-            saldo_temp -= float(row['valor'])
-            if saldo_temp < 0 and not dia_negativo:
-                dia_negativo = d
-
-if dia_negativo:
-    st.error(f"⚠️ Atenção: saldo negativo no dia {dia_negativo}")
-else:
-    st.success("✅ Você vai fechar o mês positivo 💖")
 
 # ================== META ==================
 meta = 235000
 total = df[df['tipo']=="Entrada"]['valor'].sum() if not df.empty else 0
 
-st.subheader("🏠 Nosso Apê 💕")
-st.progress(min(total/meta if meta>0 else 0,1.0))
-st.write(f"R$ {total:,.2f} / R$ {meta:,.2f}")
+st.subheader("🏠 Nosso sonho ganhando forma 💕")
+
+progress = total/meta if meta > 0 else 0
+st.progress(min(progress,1.0))
+
+st.write(f"💰 Guardado: R$ {total:,.2f}")
+st.write(f"🎯 Meta: R$ {meta:,.2f}")
+st.write(f"📊 {progress*100:.1f}% concluído")
+
+# ================== GRÁFICO ==================
+if not df.empty:
+    fig = px.bar(df, x='quem', y='valor', color='tipo')
+    fig.update_layout(
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        font_color='white'
+    )
+    st.plotly_chart(fig, use_container_width=True)
 
 # ================== FOOTER ==================
 st.markdown("""
-<div style="text-align:center;margin-top:50px">
-<p style="color:#ff1493;font-size:18px;">Construindo nosso futuro juntos 💑✨</p>
-<p style="color:#666;">HERMEX SOLUTIONS</p>
+<div style="text-align:center;margin-top:50px;padding:20px;border-top:1px solid #111;">
+<p style="color:#ff1493;font-size:18px;">Juntos construindo nosso futuro 💑✨</p>
+<p style="color:#666;font-size:12px;">HERMEX SOLUTIONS © 2026</p>
 </div>
 """, unsafe_allow_html=True)
