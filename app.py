@@ -9,146 +9,117 @@ import random
 st.set_page_config(page_title="CB Financeiro | HermeX", layout="wide")
 
 # ================== SUPABASE ==================
-SUPABASE_URL = "https://dqckorlftspzadevawge.supabase.co"
-SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRxY2tvcmxmdHNwemFkZXZhd2dlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwNzMwNTksImV4cCI6MjA5MDY0OTA1OX0.OZz8Mt_oS4t57FxVmWsXsdhSg59Sb57B0V9BofQIrkQ"
+SUPABASE_URL = "https://dqxkorlftspzadevawge.supabase.co"
+SUPABASE_KEY = "SUA_KEY_AQUI"
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-# ================== ANIMAÇÕES ==================
+# ================== CSS ==================
 st.markdown("""
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Montserrat:wght@300;600&display=swap');
 
-/* Fundo gradient */
 .stApp {
-    background: linear-gradient(180deg, #000000, #0d001a);
+    background: radial-gradient(circle at top, #0a0014, #000);
     color: white;
+    font-family: 'Montserrat', sans-serif;
 }
 
-/* Corações */
-.heart {
-    position: fixed;
-    top: -10px;
-    color: #ff1493;
-    font-size: 16px;
-    animation: fall linear infinite;
-}
-@keyframes fall {
-    to { transform: translateY(110vh); }
+/* inputs escuros */
+input, select {
+    background-color: #111 !important;
+    color: white !important;
+    border-radius: 10px !important;
 }
 
-/* Logo com glow */
+/* botão */
+button {
+    background: #ff1493 !important;
+    color: white !important;
+    border-radius: 10px !important;
+}
+
+/* logo */
 .logo {
-    font-size: 80px;
+    font-family: 'Playfair Display', serif;
+    font-size: 90px;
     background: linear-gradient(#ff1493,#ff69b4);
     -webkit-background-clip:text;
     -webkit-text-fill-color:transparent;
-    animation: glow 2s ease-in-out infinite alternate;
-}
-@keyframes glow {
-    from { text-shadow: 0 0 10px #ff1493; }
-    to { text-shadow: 0 0 25px #ff69b4; }
 }
 
-/* Cards */
+/* frase */
+.frase {
+    color: #ff69b4;
+    font-size: 14px;
+    margin-top: -20px;
+}
+
+/* cards */
 .card {
     background:#0a0a0a;
     padding:25px;
     border-radius:20px;
-    margin-bottom:20px;
+    margin-bottom:15px;
     transition:0.3s;
-    border:1px solid #1a1a1a;
 }
 .card:hover {
-    transform: scale(1.03);
-    box-shadow: 0 0 20px #ff1493;
+    transform:scale(1.03);
+    box-shadow:0 0 20px #ff1493;
 }
 
-/* Valores */
 .value {
-    font-size:30px;
+    font-size:28px;
     color:#ff1493;
     font-weight:bold;
-    animation: pulse 2s infinite;
 }
-@keyframes pulse {
-    0% {opacity:0.8;}
-    50% {opacity:1;}
-    100% {opacity:0.8;}
-}
-
-/* Botões */
-.stButton>button {
-    background:#ff1493;
-    color:white;
-    border-radius:10px;
-    transition:0.3s;
-}
-.stButton>button:hover {
-    transform:scale(1.05);
-}
-
-/* Inputs */
-input, select {
-    background:#111 !important;
-    color:white !important;
-}
-
-/* Remove rodapé padrão */
-footer {visibility:hidden;}
-
 </style>
 """, unsafe_allow_html=True)
-
-# gerar corações
-for i in range(20):
-    st.markdown(f"""
-    <div class="heart" style="
-        left:{random.randint(0,100)}%;
-        animation-duration:{random.randint(5,12)}s;
-        opacity:{random.random()};
-    ">❤️</div>
-    """, unsafe_allow_html=True)
 
 # ================== DATA ==================
 hoje = datetime.now()
 dia_atual = hoje.day
-data_entrega = datetime(2029,4,30)
-dias_restantes = (data_entrega - hoje).days
+
+# ================== SALÁRIOS ==================
+salarios = {
+    "Cauã": {"v1": 3000, "d1": 5, "v2": 3000, "d2": 20},
+    "Beca": {"v1": 2000, "d1": 5, "v2": 2000, "d2": 20}
+}
 
 # ================== DADOS ==================
-response = supabase.table("transacoes").select("*").execute()
-df = pd.DataFrame(response.data) if response.data else pd.DataFrame()
+try:
+    response = supabase.table("transacoes").select("*").execute()
+    df = pd.DataFrame(response.data) if response.data else pd.DataFrame()
+except:
+    df = pd.DataFrame()
 
 # ================== HEADER ==================
-col1,col2 = st.columns(2)
-
-with col1:
-    st.markdown('<div class="logo">CB</div>', unsafe_allow_html=True)
-    st.write(f"📅 Hoje: {hoje.strftime('%d/%m/%Y')}")
-
-with col2:
-    st.markdown(f"""
-    <div style='text-align:right'>
-        <div style='font-size:38px;font-weight:800;'>{dias_restantes} dias</div>
-        <div style='color:#ff69b4;'>para o nosso apê 🏠💖</div>
-    </div>
-    """, unsafe_allow_html=True)
+st.markdown('<div class="logo">CB 💖</div>', unsafe_allow_html=True)
+st.markdown('<div class="frase">cada centavo mais perto do nosso cantinho 🏠💕</div>', unsafe_allow_html=True)
+st.write(f"📅 {hoje.strftime('%d/%m/%Y')}")
 
 # ================== MOTOR ==================
 entrada = 0
 saida = 0
 
+for p, s in salarios.items():
+    if dia_atual >= s["d1"]:
+        entrada += s["v1"]
+    if dia_atual >= s["d2"]:
+        entrada += s["v2"]
+
 for _, row in df.iterrows():
-    inicio = pd.to_datetime(row['inicio']).date()
-    fim = pd.to_datetime(row['fim']).date()
+    try:
+        inicio = pd.to_datetime(row['inicio']).date()
+        fim = pd.to_datetime(row['fim']).date()
 
-    ativo = inicio <= hoje.date() <= fim
-
-    if row['tipo'] == 'Entrada':
-        if ativo:
-            entrada += float(row['valor'])
-    else:
-        if ativo and int(row['vencimento']) <= dia_atual:
-            saida += float(row['valor'])
+        if inicio <= hoje.date() <= fim:
+            if row['tipo'] == 'Entrada':
+                entrada += float(row['valor'])
+            else:
+                if int(row['vencimento']) <= dia_atual:
+                    saida += float(row['valor'])
+    except:
+        pass
 
 saldo = entrada - saida
 
@@ -159,8 +130,16 @@ c1.markdown(f'<div class="card">Entradas<br><span class="value">R$ {entrada:.2f}
 c2.markdown(f'<div class="card">Saídas<br><span class="value">R$ {saida:.2f}</span></div>', unsafe_allow_html=True)
 c3.markdown(f'<div class="card">Saldo<br><span class="value">R$ {saldo:.2f}</span></div>', unsafe_allow_html=True)
 
+# ================== ALERTA ==================
+if saldo < 0:
+    st.error("⚠️ saldo negativo!")
+elif saldo < 1000:
+    st.warning("⚠️ cuidado com os gastos")
+else:
+    st.success("💖 tudo sob controle")
+
 # ================== FORM ==================
-st.subheader("💖 Registrar momento financeiro")
+st.subheader("💖 Registrar")
 
 c1,c2,c3,c4 = st.columns([1,2,1,1])
 
@@ -172,7 +151,7 @@ valor = c4.number_input("Valor", min_value=0.0)
 quem = c1.selectbox("Quem", ["Cauã","Beca","Ambos"])
 
 if categoria == "Fixo":
-    venc = st.number_input("Vencimento",1,31)
+    venc = st.number_input("Dia vencimento",1,31)
     inicio = st.date_input("Início")
     fim = st.date_input("Fim")
 else:
@@ -180,7 +159,7 @@ else:
     inicio = hoje
     fim = hoje
 
-if st.button("Salvar 💕"):
+if st.button("Salvar 💸"):
     supabase.table("transacoes").insert({
         "data": hoje.strftime("%Y-%m-%d"),
         "tipo": tipo,
@@ -188,40 +167,53 @@ if st.button("Salvar 💕"):
         "categoria": categoria,
         "valor": float(valor),
         "vencimento": int(venc),
-        "inicio": str(pd.to_datetime(inicio)),
-        "fim": str(pd.to_datetime(fim)),
-        "quem": quem
+        "inicio": str(inicio),
+        "fim": str(fim),
+        "quem": quem,
+        "pago": False
     }).execute()
 
+    st.success("Salvo 💕")
     st.rerun()
 
-# ================== META ==================
+# ================== META APÊ ==================
+st.subheader("🏠 Nosso Apê")
+
 meta = 235000
-total = df[df['tipo']=="Entrada"]['valor'].sum() if not df.empty else 0
 
-st.subheader("🏠 Nosso sonho ganhando forma 💕")
+ap_pago = df[
+    (df["categoria"] == "Apartamento") &
+    (df["pago"] == True)
+]["valor"].sum() if not df.empty else 0
 
-progress = total/meta if meta > 0 else 0
-st.progress(min(progress,1.0))
-
-st.write(f"💰 Guardado: R$ {total:,.2f}")
-st.write(f"🎯 Meta: R$ {meta:,.2f}")
-st.write(f"📊 {progress*100:.1f}% concluído")
+st.progress(min(ap_pago/meta,1.0))
+st.write(f"R$ {ap_pago:,.2f} / R$ {meta:,.2f}")
 
 # ================== GRÁFICO ==================
 if not df.empty:
-    fig = px.bar(df, x='quem', y='valor', color='tipo')
+    fig = px.bar(
+        df,
+        x='quem',
+        y='valor',
+        color='tipo',
+        color_discrete_map={
+            "Entrada": "#ff69b4",
+            "Saída": "#ff1493"
+        }
+    )
+
     fig.update_layout(
-        paper_bgcolor='rgba(0,0,0,0)',
-        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='black',
+        plot_bgcolor='black',
         font_color='white'
     )
+
     st.plotly_chart(fig, use_container_width=True)
 
 # ================== FOOTER ==================
 st.markdown("""
-<div style="text-align:center;margin-top:50px;padding:20px;border-top:1px solid #111;">
-<p style="color:#ff1493;font-size:18px;">Juntos construindo nosso futuro 💑✨</p>
-<p style="color:#666;font-size:12px;">HERMEX SOLUTIONS © 2026</p>
+<div style="text-align:center;margin-top:40px;">
+<p style="color:#ff1493;">feito com amor pra nossa vida 💑</p>
+<p style="color:#666;">HERMEX SOLUTIONS © 2026</p>
 </div>
 """, unsafe_allow_html=True)
