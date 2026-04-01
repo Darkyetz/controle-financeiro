@@ -9,7 +9,7 @@ import random
 st.set_page_config(page_title="CB Financeiro | HermeX", layout="wide")
 
 # ================== SUPABASE ==================
-SUPABASE_URL = "https://dqxkorlftspzadevawge.supabase.co"
+SUPABASE_URL = "https://dqckorlftspzadevawge.supabase.co"
 SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRxY2tvcmxmdHNwemFkZXZhd2dlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwNzMwNTksImV4cCI6MjA5MDY0OTA1OX0.OZz8Mt_oS4t57FxVmWsXsdhSg59Sb57B0V9BofQIrkQ"
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
