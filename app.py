@@ -9,7 +9,7 @@ import random
 st.set_page_config(page_title="CB Financeiro | HermeX", layout="wide")
 
 # ================== SUPABASE ==================
-SUPABASE_URL = "https://dqxkorlftspzadevawge.supabase.co"
+SUPABASE_URL = "https://dqckorlftspzadevawge.supabase.co"
 SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRxY2tvcmxmdHNwemFkZXZhd2dlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwNzMwNTksImV4cCI6MjA5MDY0OTA1OX0.OZz8Mt_oS4t57FxVmWsXsdhSg59Sb57B0V9BofQIrkQ"
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
@@ -72,8 +72,30 @@ button {
     color:#ff1493;
     font-weight:bold;
 }
+
+/* corações */
+.heart {
+    position: fixed;
+    top: -10px;
+    font-size: 16px;
+    color: #ff1493;
+    animation: fall linear infinite;
+}
+@keyframes fall {
+    to { transform: translateY(110vh); }
+}
 </style>
 """, unsafe_allow_html=True)
+
+# ================== CORAÇÕES ==================
+for _ in range(15):
+    st.markdown(f"""
+    <div class="heart" style="
+        left:{random.randint(0,100)}%;
+        animation-duration:{random.randint(6,12)}s;
+        opacity:{random.random()};
+    ">❤️</div>
+    """, unsafe_allow_html=True)
 
 # ================== DATA ==================
 hoje = datetime.now()
@@ -101,12 +123,14 @@ st.write(f"📅 {hoje.strftime('%d/%m/%Y')}")
 entrada = 0
 saida = 0
 
+# salários automáticos
 for p, s in salarios.items():
     if dia_atual >= s["d1"]:
         entrada += s["v1"]
     if dia_atual >= s["d2"]:
         entrada += s["v2"]
 
+# transações
 for _, row in df.iterrows():
     try:
         inicio = pd.to_datetime(row['inicio']).date()
@@ -131,10 +155,12 @@ c2.markdown(f'<div class="card">Saídas<br><span class="value">R$ {saida:.2f}</s
 c3.markdown(f'<div class="card">Saldo<br><span class="value">R$ {saldo:.2f}</span></div>', unsafe_allow_html=True)
 
 # ================== ALERTA ==================
+st.subheader("🔔 Alerta")
+
 if saldo < 0:
     st.error("⚠️ saldo negativo!")
 elif saldo < 1000:
-    st.warning("⚠️ cuidado com os gastos")
+    st.warning("⚠️ cuidado, saldo baixo")
 else:
     st.success("💖 tudo sob controle")
 
@@ -149,6 +175,8 @@ categoria = c3.selectbox("Categoria", ["Fixo","Outros","Lazer","Apartamento"])
 valor = c4.number_input("Valor", min_value=0.0)
 
 quem = c1.selectbox("Quem", ["Cauã","Beca","Ambos"])
+
+data_real = st.date_input("Data real (opcional)")
 
 if categoria == "Fixo":
     venc = st.number_input("Dia vencimento",1,31)
@@ -170,11 +198,27 @@ if st.button("Salvar 💸"):
         "inicio": str(inicio),
         "fim": str(fim),
         "quem": quem,
+        "data_real": str(data_real),
         "pago": False
     }).execute()
 
     st.success("Salvo 💕")
     st.rerun()
+
+# ================== CONTAS ==================
+st.subheader("📌 Contas Pendentes")
+
+if not df.empty and "pago" in df.columns:
+    pendentes = df[df["pago"] == False]
+
+    for i, row in pendentes.iterrows():
+        col1,col2 = st.columns([3,1])
+
+        col1.write(f"{row['nome']} - R$ {row['valor']}")
+
+        if col2.button(f"Pagar {i}"):
+            supabase.table("transacoes").update({"pago": True}).eq("id", row["id"]).execute()
+            st.rerun()
 
 # ================== META APÊ ==================
 st.subheader("🏠 Nosso Apê")
@@ -188,6 +232,16 @@ ap_pago = df[
 
 st.progress(min(ap_pago/meta,1.0))
 st.write(f"R$ {ap_pago:,.2f} / R$ {meta:,.2f}")
+
+# ================== CALENDÁRIO ==================
+st.subheader("📆 Calendário")
+
+if not df.empty and "data_real" in df.columns:
+    df["data_real"] = pd.to_datetime(df["data_real"], errors="coerce")
+    calendario = df[["data_real","nome","valor"]].dropna()
+    calendario = calendario.sort_values("data_real")
+
+    st.dataframe(calendario, use_container_width=True)
 
 # ================== GRÁFICO ==================
 if not df.empty:
